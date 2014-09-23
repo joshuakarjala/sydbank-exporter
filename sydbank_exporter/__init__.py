@@ -1,0 +1,120 @@
+"""
+Create CSV file for Sydbank based on a list of transactions.
+
+"""
+
+import csv
+import datetime
+import cStringIO as StringIO
+
+
+def prepend_zeros(string, min_length):
+    current_length = len(string)
+    padding = min_length - current_length
+    return padding * '0' + string
+
+
+def append_spaces(string, min_length):
+    current_length = len(string)
+    padding = min_length - current_length
+    return string + padding * ' '
+
+
+def blank_column(length):
+    return append_spaces('', length)
+
+
+def export_transactions(transactions, transaction_sum, num_transactions, write_to=False):
+    """
+    Takes a list of transaction dicts and converts to Sydbank compatible format.
+
+    You must supply transaction_sum and num_transactions as verification.
+
+    Transaction dictionary format:
+
+    {
+        'amount': 100,
+        'from_account_number': '22330001033105',
+        'to_reg_number': '7981',
+        'to_account_number': '1046139',
+        'text': 'hej med dig',
+        'to_user_name': 'Kaj Nielsen'
+    }
+    """
+
+    csvfile = StringIO.StringIO()
+    writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
+    today = datetime.date.today()
+    tomorrow = today + datetime.timedelta(days=1)
+
+    todaystring = today.strftime('%Y%m%d')
+    tomorrowstring = tomorrow.strftime('%Y%m%d')
+
+    start_row = [
+        'IB000000000000',
+        todaystring,
+        blank_column(90),
+        blank_column(255),
+        blank_column(255),
+        blank_column(255)
+    ]
+
+    writer.writerow(start_row)
+
+    index = 0
+    for transaction in transactions:
+        index += 1
+        row = [
+            'IB030202000005',
+            prepend_zeros('%d' % index, 4),  # index of transaction starting at 1
+            tomorrowstring,  # date
+            prepend_zeros('%d+' % (transaction['amount'] * 100), 14),  # amount in ore
+            'DKK',
+            '2',
+            prepend_zeros(transaction['from_account_number'], 15),  # from account
+            '2',
+            transaction['to_reg_number'],  # to reg number
+            prepend_zeros(transaction['to_account_number'], 10),  # to account number
+            '0',
+            append_spaces(transaction['text'], 35),  # text to customer statement
+            append_spaces(transaction['to_user_name'], 32),  # customer name
+            blank_column(32),
+            blank_column(32),
+            blank_column(4),
+            blank_column(32),
+            append_spaces(transaction['text'], 35),  # text on our statement
+            blank_column(35),
+            blank_column(35),
+            blank_column(35),
+            blank_column(35),
+            blank_column(35),
+            blank_column(35),
+            blank_column(35),
+            blank_column(35),
+            blank_column(35),
+            blank_column(1),
+            blank_column(215)
+        ]
+
+        writer.writerow(row)
+
+    end_row = [
+        'IB999999999999',
+        todaystring,
+        prepend_zeros('%d' % num_transactions, 6),  # num transactions
+        prepend_zeros('%d+' % (transaction_sum * 100), 14),  # sum of transaction values
+        blank_column(64),
+        blank_column(255),
+        blank_column(255),
+        blank_column(255)
+    ]
+
+    writer.writerow(end_row)
+
+    if write_to:
+        with open(write_to, 'wb') as f:
+            csvfile.seek(0)
+            f.write(csvfile.read())
+            f.close()
+    else:
+        return csvfile
