@@ -6,15 +6,21 @@ Create CSV file for Sydbank based on a list of transactions.
 import csv
 import datetime
 import cStringIO as StringIO
-
+import unicodedata
 
 def prepend_zeros(string, min_length):
+    if isinstance(string, unicode):
+        string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
+
     current_length = len(string)
     padding = min_length - current_length
     return padding * '0' + string
 
 
 def append_spaces(string, min_length):
+    if isinstance(string, unicode):
+        string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
+
     current_length = len(string)
     padding = min_length - current_length
     return string + padding * ' '
