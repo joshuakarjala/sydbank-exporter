@@ -39,12 +39,16 @@ def export_transactions(transactions, transaction_sum, num_transactions, write_t
     Transaction dictionary format:
 
     {
-        'amount': 100,
-        'from_account_number': '22330001033105',
-        'to_reg_number': '7981',
-        'to_account_number': '1046139',
-        'text': 'hej med dig',
-        'to_user_name': 'Kaj Nielsen'
+        'amount': 100, # 13 digits
+        'from_account_number': '22330001033105', # 15 digits
+        'from_text': 'This text is for your bank statement', # 35 chars
+        'to_reg_number': '7981', # 4 digits
+        'to_account_number': '1046139', # 10 digits
+        'to_text': 'This text is for their, # 35 chars
+        'to_user_name': 'Kaj Nielsen', # 32 chars
+        'bilagsnr': '324324', # 35 chars
+        'date': '20141201', # 8 digits (optional)
+        'currency': 'DKK' # 3 chars (optional)
     }
     """
 
@@ -73,22 +77,23 @@ def export_transactions(transactions, transaction_sum, num_transactions, write_t
         row = [
             'IB030202000005',
             prepend_zeros('%d' % index, 4),  # index of transaction starting at 1
-            tomorrowstring,  # date
-            prepend_zeros('%d+' % (transaction['amount'] * 100), 14),  # amount in ore
-            'DKK',
+            prepend_zeros(transaction.get('date', tomorrowstring), 8),  # date
+            prepend_zeros('%d+' % (transaction['amount'] * 100), 14),  # amount in ore (the 14 is to include the + symbol)
+            append_spaces(transaction.get('currency', 'DKK'), 3), # currency
             '2',
             prepend_zeros(transaction['from_account_number'], 15),  # from account
             '2',
             transaction['to_reg_number'],  # to reg number
             prepend_zeros(transaction['to_account_number'], 10),  # to account number
             '0',
-            append_spaces(transaction['text'], 35),  # text to customer statement
+            append_spaces(transaction['to_text'], 35),  # text to customer statement
             append_spaces(transaction['to_user_name'], 32),  # customer name
             blank_column(32),
             blank_column(32),
             blank_column(4),
             blank_column(32),
-            append_spaces(transaction['text'], 35),  # text on our statement
+            append_spaces(transaction['bilagsnr'], 35),  # our internal bilagsnr
+            blank_column(35),
             blank_column(35),
             blank_column(35),
             blank_column(35),
