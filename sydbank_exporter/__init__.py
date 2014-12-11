@@ -41,7 +41,6 @@ def export_transactions(transactions, transaction_sum, num_transactions, write_t
     {
         'amount': 100, # 13 digits
         'from_account_number': '22330001033105', # 15 digits
-        'from_text': 'This text is for your bank statement', # 35 chars
         'to_reg_number': '7981', # 4 digits
         'to_account_number': '1046139', # 10 digits
         'to_text': 'This text is for their, # 35 chars
