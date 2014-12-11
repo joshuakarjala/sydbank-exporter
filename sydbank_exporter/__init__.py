@@ -13,6 +13,9 @@ def prepend_zeros(string, min_length):
         string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
 
     current_length = len(string)
+    if current_length > min_length:
+        raise Exception("The string is longer than %s chars" % min_length)
+
     padding = min_length - current_length
     return padding * '0' + string
 
@@ -22,6 +25,9 @@ def append_spaces(string, min_length):
         string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
 
     current_length = len(string)
+    if current_length > min_length:
+        raise Exception("The string is longer than %s chars" % min_length)
+
     padding = min_length - current_length
     return string + padding * ' '
 
