@@ -2,7 +2,7 @@
 from setuptools import setup
 
 setup(
-    name='sydbank-exporter  ',
+    name='sydbank-exporter',
     version='0.1.0',
     description='Create a CSV file that can be read by Sydbank',
     author='Joshua Karjala-Svendsen',
